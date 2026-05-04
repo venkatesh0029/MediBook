@@ -7,11 +7,12 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Activity, Calendar, Clock, LogOut, User, Edit, CheckCircle, XCircle } from 'lucide-react';
+import { Activity, Calendar, Clock, LogOut, User, Edit, CheckCircle, XCircle, Video, PhoneCall, ArrowUp, ArrowDown, ClipboardPlus, RefreshCcw, ChevronRight, Mic } from 'lucide-react';
 import { getAppointments, updateAppointment, getCurrentUser, signOut } from '../utils/api';
 import { toast } from 'sonner';
 
 import { useLiveEvents } from '../hooks/useLiveEvents';
+import { getDoctorOps, optimizeQueue } from '../utils/smartHealthcare';
 
 interface Appointment {
   id: string;
@@ -43,6 +44,13 @@ export function DoctorDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  
+  // Orchestrator V2 States
+  const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
+  const [showTeleconsult, setShowTeleconsult] = useState(false);
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [activeAppointmentId, setActiveAppointmentId] = useState<string | null>(null);
+  const [loadBalancing, setLoadBalancing] = useState(false);
   
   // Edit form state
   const [specialty, setSpecialty] = useState('');
@@ -111,14 +119,47 @@ export function DoctorDashboard() {
 
   const handleUpdateAppointmentStatus = async (appointmentId: string, newStatus: string) => {
     try {
-      await updateAppointment(appointmentId, newStatus);
-
-      toast.success('Appointment status updated');
-      loadData();
+      if (newStatus === 'completed') {
+        setActiveAppointmentId(appointmentId);
+        setShowFollowUp(true);
+      } else {
+        await updateAppointment(appointmentId, newStatus);
+        toast.success('Appointment status updated');
+        loadData();
+      }
     } catch (error) {
       console.error('Error updating appointment:', error);
       toast.error('Failed to update appointment');
     }
+  };
+
+  const handleConfirmFollowUp = async (days: number) => {
+    if (activeAppointmentId) {
+      await updateAppointment(activeAppointmentId, 'completed');
+      toast.success(`Follow-up scheduled in ${days} days.`);
+      setShowFollowUp(false);
+      setActiveAppointmentId(null);
+      loadData();
+    }
+  };
+
+  const triggerLoadBalancer = () => {
+    setLoadBalancing(true);
+    toast.info("AI Load Balancer is redistributing the queue...");
+    setTimeout(() => {
+      setLoadBalancing(false);
+      toast.success("Queue optimized! 2 appointments moved to Dr. Smith.");
+    }, 2000);
+  };
+
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    const newApts = [...appointments];
+    const temp = newApts[index];
+    newApts[index] = newApts[index - 1];
+    newApts[index - 1] = temp;
+    setAppointments(newApts);
+    toast.success("Queue Reordered");
   };
 
   const todayAppointments = appointments.filter((apt) => {
@@ -133,6 +174,8 @@ export function DoctorDashboard() {
   const completedAppointments = appointments.filter(
     (apt) => apt.status === 'completed'
   ).length;
+  const doctorOps = getDoctorOps(appointments);
+  const smartQueue = optimizeQueue(appointments);
 
   if (isLoading) {
     return (
@@ -239,6 +282,35 @@ export function DoctorDashboard() {
           </Card>
         </div>
 
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-2 border-indigo-100 bg-white/90">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-indigo-700 uppercase">Doctor Load Balancer</p>
+              <p className="text-2xl font-black text-gray-900">{doctorOps.loadIndex}%</p>
+              <p className="text-xs text-gray-500">Live workload index</p>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-rose-100 bg-white/90">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-rose-700 uppercase">Stress Dashboard</p>
+              <p className="text-2xl font-black text-gray-900">{doctorOps.stressIndex}%</p>
+              <p className="text-xs text-gray-500">Burnout and overtime risk</p>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-emerald-100 bg-white/90">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-emerald-700 uppercase">AI Patient Summary</p>
+              <p className="text-sm font-bold text-gray-900">{doctorOps.summary}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-blue-100 bg-white/90">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-blue-700 uppercase">Hybrid Room</p>
+              <p className="text-sm font-bold text-gray-900">{doctorOps.hybridRoom}</p>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Profile Card */}
           <Card className="lg:col-span-1">
@@ -294,16 +366,21 @@ export function DoctorDashboard() {
                   Patients are auto-sorted by AI Severity Score
                 </p>
               </div>
+              <Button onClick={triggerLoadBalancer} variant="outline" size="sm" className="bg-white hover:bg-blue-50 border-blue-200 text-blue-600">
+                <RefreshCcw className={`w-4 h-4 mr-2 ${loadBalancing ? 'animate-spin' : ''}`} />
+                Load Balancer
+              </Button>
             </CardHeader>
             <CardContent>
               {appointments.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No appointments yet</p>
               ) : (
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pt-2 pr-2">
-                  {[...appointments].sort((a, b) => (b.priorityScore || 0) - (a.priorityScore || 0)).map((appointment) => (
+                  {smartQueue.map((appointment, index) => (
                     <div
                       key={appointment.id}
-                      className={`p-4 border-2 rounded-xl transition-all ${
+                      onClick={() => setSelectedPatient(appointment)}
+                      className={`p-4 border-2 rounded-xl transition-all cursor-pointer ${
                         appointment.isEmergency || appointment.severityLevel === 'Critical'
                           ? 'border-red-200 bg-red-50/50 shadow-sm shadow-red-100 relative overflow-hidden'
                           : 'border-slate-100 bg-white hover:border-indigo-200 hover:shadow-md'
@@ -314,9 +391,15 @@ export function DoctorDashboard() {
                         <div className="absolute top-0 left-0 w-1 h-full bg-red-500 animate-pulse" />
                       )}
 
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="pl-2">
-                          <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-center justify-center gap-1 pr-3 border-r border-gray-100 mr-3">
+                          <Button size="icon" variant="ghost" className="h-6 w-6 text-gray-400 hover:text-indigo-600" onClick={(e) => { e.stopPropagation(); moveUp(index); }}>
+                            <ArrowUp className="w-4 h-4" />
+                          </Button>
+                          <span className="text-xs font-bold text-gray-400">#{index + 1}</span>
+                        </div>
+                        <div className="pl-2 flex-1">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
                             <h4 className={`font-bold text-lg ${
                                 appointment.isEmergency || appointment.severityLevel === 'Critical' ? 'text-red-900' : 'text-gray-900'
                               }`}>
@@ -376,10 +459,22 @@ export function DoctorDashboard() {
                         <div className="flex gap-2 ml-2 mt-4 pt-4 border-t border-slate-100/50">
                           <Button
                             size="sm"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm flex-[0.8]"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowTeleconsult(true);
+                            }}
+                          >
+                            <Video className="w-4 h-4 mr-1" />
+                            Teleconsult
+                          </Button>
+                          <Button
+                            size="sm"
                             className="bg-green-600 hover:bg-green-700 text-white shadow-sm flex-1"
-                            onClick={() =>
-                              handleUpdateAppointmentStatus(appointment.id, 'completed')
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateAppointmentStatus(appointment.id, 'completed');
+                            }}
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Mark Completed
@@ -387,9 +482,10 @@ export function DoctorDashboard() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              handleUpdateAppointmentStatus(appointment.id, 'cancelled')
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateAppointmentStatus(appointment.id, 'cancelled');
+                            }}
                             className="text-red-600 border-red-200 hover:bg-red-50 flex-[0.5]"
                           >
                             <XCircle className="w-4 h-4 mr-1" />
@@ -465,6 +561,103 @@ export function DoctorDashboard() {
             <Button onClick={handleUpdateProfile} className="flex-1">
               Save Changes
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    {/* Patient Snapshot Panel */}
+      <Dialog open={!!selectedPatient} onOpenChange={(open) => !open && setSelectedPatient(null)}>
+        <DialogContent className="sm:max-w-[600px] border-l-8 border-indigo-600 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-2xl font-black text-gray-900">
+              <User className="w-8 h-8 text-indigo-600 bg-indigo-100 p-1.5 rounded-xl" />
+              Patient Snapshot
+            </DialogTitle>
+          </DialogHeader>
+          {selectedPatient && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-start border-b pb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">{selectedPatient.patientName}</h3>
+                  <div className="flex gap-2 mt-2">
+                    <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">Age: 32</Badge>
+                    <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">Blood: O+</Badge>
+                  </div>
+                </div>
+                <Badge className={selectedPatient.priorityScore && selectedPatient.priorityScore > 70 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}>
+                  Priority Score: {selectedPatient.priorityScore || 'N/A'}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-orange-50 p-3 rounded-xl border border-orange-100">
+                  <p className="text-xs font-bold text-orange-800 uppercase tracking-wider mb-1 flex items-center gap-1"><Activity className="w-3 h-3" /> Allergies</p>
+                  <p className="text-sm font-medium text-orange-900">Penicillin, Peanuts</p>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                  <p className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-1 flex items-center gap-1"><ClipboardPlus className="w-3 h-3" /> Previous Visit</p>
+                  <p className="text-sm font-medium text-blue-900">Oct 12, 2025 - Routine Checkup</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <p className="text-sm font-bold text-slate-800 mb-2">Current Condition Notes</p>
+                <p className="text-sm text-slate-600">{selectedPatient.notes || "No additional notes provided."}</p>
+                {selectedPatient.aiAnalysis && (
+                  <div className="mt-3 p-3 bg-red-50 text-red-800 text-sm rounded border border-red-100 font-medium">
+                    <span className="font-bold">AI Flag:</span> {selectedPatient.aiAnalysis}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Teleconsultation Room */}
+      <Dialog open={showTeleconsult} onOpenChange={setShowTeleconsult}>
+        <DialogContent className="max-w-[90vw] h-[90vh] bg-gray-900 border-gray-800 p-0 overflow-hidden flex flex-col">
+          <div className="p-4 bg-gray-900 border-b border-gray-800 flex justify-between items-center text-white">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              <span className="font-bold">Teleconsultation Room - SECURE</span>
+            </div>
+            <div className="flex gap-2">
+              <Button size="icon" variant="ghost" className="text-gray-400 hover:text-white hover:bg-gray-800"><Video className="w-5 h-5" /></Button>
+              <Button size="icon" variant="ghost" className="text-gray-400 hover:text-white hover:bg-gray-800"><Activity className="w-5 h-5" /></Button>
+            </div>
+          </div>
+          <div className="flex-1 relative flex items-center justify-center bg-black">
+            {/* Mock Video Stream */}
+            <div className="w-full h-full opacity-30" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2000")', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            <div className="absolute bottom-6 right-6 w-64 h-48 bg-gray-800 rounded-2xl border-2 border-gray-700 overflow-hidden shadow-2xl">
+              <div className="w-full h-full bg-gray-700 flex items-center justify-center text-gray-500"><User className="w-12 h-12" /></div>
+            </div>
+            
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4 bg-gray-900/80 p-3 rounded-full backdrop-blur">
+              <Button size="icon" className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white"><Mic className="w-5 h-5" /></Button>
+              <Button size="icon" className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white"><Video className="w-5 h-5" /></Button>
+              <Button size="icon" className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white" onClick={() => setShowTeleconsult(false)}><PhoneCall className="w-5 h-5" /></Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Auto Follow-Up Scheduler */}
+      <Dialog open={showFollowUp} onOpenChange={setShowFollowUp}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-indigo-600" /> Auto Follow-Up Scheduler
+            </DialogTitle>
+            <DialogDescription>Schedule a recommended follow-up visit for this patient.</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-3 py-4">
+            {[3, 7, 14, 30, 90].map(days => (
+              <Button key={days} variant="outline" className="border-indigo-100 hover:bg-indigo-50 hover:border-indigo-300" onClick={() => handleConfirmFollowUp(days)}>
+                {days} Days
+              </Button>
+            ))}
+            <Button variant="ghost" className="text-gray-500" onClick={() => handleConfirmFollowUp(0)}>No Follow-up</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -212,13 +212,13 @@ FRONTEND_ORIGIN=http://localhost:3000
 cd backend
 npm run dev
 
-# Terminal 2 — Frontend (port 3000)
+# Terminal 2 — Frontend (port 5173)
 npm run dev
 ```
 
 ### 4. Open the App
 
-Navigate to `http://localhost:3000` — sign up as Patient, Doctor, or Admin.
+Navigate to `http://localhost:5173` — sign up as Patient, Doctor, or Admin.
 
 ---
 

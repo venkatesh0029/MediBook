@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Activity, Users, AlertTriangle, Zap, Server, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import { Activity, Users, AlertTriangle, Zap, Server, BarChart3, PieChart as PieChartIcon, Building, CreditCard, TrendingUp, Map, Thermometer } from 'lucide-react';
 import { motion } from 'motion/react';
 import { DashboardHeader } from '../components/DashboardHeader';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 import { useNavigate } from 'react-router';
 import { getCurrentUser, getStats } from '../utils/api';
+import { getAdminOps } from '../utils/smartHealthcare';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -16,6 +17,20 @@ export function AdminDashboard() {
     doctorsAvailable: 0,
     systemLoad: 0
   });
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const adminOps = getAdminOps();
+
+  const heatmapData = [
+    { time: '08:00', branch: 'Main', crowd: 85 },
+    { time: '08:00', branch: 'North', crowd: 40 },
+    { time: '08:00', branch: 'West', crowd: 20 },
+    { time: '12:00', branch: 'Main', crowd: 95 },
+    { time: '12:00', branch: 'North', crowd: 60 },
+    { time: '12:00', branch: 'West', crowd: 50 },
+    { time: '16:00', branch: 'Main', crowd: 40 },
+    { time: '16:00', branch: 'North', crowd: 80 },
+    { time: '16:00', branch: 'West', crowd: 30 },
+  ];
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -63,15 +78,34 @@ export function AdminDashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">
-              Live Emergency Triage Network
+              Unified Hospital Management Panel
             </h2>
-            <p className="text-slate-400 mt-2">Real-time system load and AI allocations</p>
+            <p className="text-slate-400 mt-2">Real-time system load and AI allocations across all branches</p>
           </div>
           <div className="flex items-center gap-3 bg-red-950/50 border border-red-900 px-4 py-2 rounded-full">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             <span className="text-red-400 text-sm font-bold uppercase tracking-widest">Network Live</span>
           </div>
         </div>
+
+        {/* Unified Navigation */}
+        <div className="flex gap-2 mb-8 bg-slate-900 p-2 rounded-xl inline-flex">
+          <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${activeTab === 'dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <Activity className="w-4 h-4" /> Live Dashboard
+          </button>
+          <button onClick={() => setActiveTab('billing')} className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${activeTab === 'billing' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <CreditCard className="w-4 h-4" /> Billing & Revenue
+          </button>
+          <button onClick={() => setActiveTab('staff')} className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${activeTab === 'staff' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <Users className="w-4 h-4" /> Staff & Doctors
+          </button>
+          <button onClick={() => setActiveTab('branches')} className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${activeTab === 'branches' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <Building className="w-4 h-4" /> Multi-Branch
+          </button>
+        </div>
+
+        {activeTab === 'dashboard' && (
+          <>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="bg-slate-900 border-slate-800">
@@ -221,26 +255,137 @@ export function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-slate-900 border-slate-800 lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg text-slate-300">Live Event Log</CardTitle>
+              <CardTitle className="text-lg text-slate-300 flex items-center gap-2">
+                <Thermometer className="w-5 h-5 text-orange-500" /> Crowd Heatmap Scheduler
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[
-                  { time: 'Just now', msg: 'System initialized and connected to database', type: 'system' }
-                ].map((log, i) => (
-                  <div key={i} className="flex gap-3 text-sm border-b border-slate-800 pb-3">
-                    <span className="text-slate-500 text-xs w-16 shrink-0">{log.time}</span>
-                    <span className={log.type === 'critical' ? 'text-red-400' : log.type === 'system' ? 'text-purple-400' : 'text-slate-300'}>
-                      {log.msg}
-                    </span>
-                  </div>
-                ))}
+              <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-slate-500 mb-2">
+                <div></div>
+                <div>08:00 AM</div>
+                <div>12:00 PM</div>
+                <div>04:00 PM</div>
+              </div>
+              {['Main', 'North', 'West'].map(branch => (
+                <div key={branch} className="grid grid-cols-4 gap-2 mb-2 items-center">
+                  <div className="text-sm font-bold text-slate-300 text-right pr-4">{branch} Clinic</div>
+                  {heatmapData.filter(d => d.branch === branch).map((d, i) => (
+                    <div key={i} className={`h-12 rounded-lg flex items-center justify-center font-bold text-white shadow-inner ${d.crowd > 80 ? 'bg-red-500' : d.crowd > 50 ? 'bg-orange-500' : 'bg-green-500'}`}>
+                      {d.crowd}%
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-lg text-slate-300 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-400" /> Predictive Demand
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                <p className="text-sm text-slate-400 mb-2">Forecasted Patient Rush (Tomorrow)</p>
+                <p className="text-4xl font-black text-blue-400">+24%</p>
+                <p className="text-xs text-slate-500 mt-2">Driven by: Flu Season Spike</p>
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Cardiology</span>
+                  <span className="text-green-400 font-bold">Stable</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Pediatrics</span>
+                  <span className="text-red-400 font-bold">High Demand</span>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
+        </>
+        )}
+        
+        {activeTab !== 'dashboard' && (
+          <div className="grid md:grid-cols-3 gap-6">
+            {activeTab === 'billing' && (
+              <>
+                <Card className="bg-slate-900 border-slate-800">
+                  <CardContent className="p-6">
+                    <CreditCard className="w-6 h-6 text-emerald-400 mb-4" />
+                    <p className="text-xs text-slate-500 font-bold uppercase">No-Show Prediction Engine</p>
+                    <p className="text-4xl font-black text-white mt-2">{adminOps.noShowRisk}%</p>
+                    <p className="text-sm text-slate-400 mt-2">{adminOps.depositSuggestion}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-900 border-slate-800">
+                  <CardContent className="p-6">
+                    <TrendingUp className="w-6 h-6 text-blue-400 mb-4" />
+                    <p className="text-xs text-slate-500 font-bold uppercase">Revenue Leakage Recovered</p>
+                    <p className="text-4xl font-black text-white mt-2">{adminOps.revenueRecovered}</p>
+                    <p className="text-sm text-slate-400 mt-2">Waitlist fills and deposit nudges applied.</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-900 border-slate-800">
+                  <CardContent className="p-6">
+                    <Server className="w-6 h-6 text-purple-400 mb-4" />
+                    <p className="text-xs text-slate-500 font-bold uppercase">Unified Ops Console</p>
+                    <p className="text-lg font-black text-white mt-2">Booking + billing + lab + pharmacy + reports</p>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {activeTab === 'staff' && (
+              <>
+                {[
+                  ['Dr. Sarah Smith', 'Cardiology', '92% load', 'Move 2 follow-ups to Dr. Chen'],
+                  ['Dr. Michael Chen', 'Neurology', '58% load', 'Can absorb urgent consults'],
+                  ['Dr. James Brown', 'General', '74% load', 'Hold two lite-mode teleconsults'],
+                ].map(([name, specialty, load, action]) => (
+                  <Card key={name} className="bg-slate-900 border-slate-800">
+                    <CardContent className="p-6">
+                      <Users className="w-6 h-6 text-indigo-400 mb-4" />
+                      <p className="text-lg font-black text-white">{name}</p>
+                      <p className="text-sm text-slate-400">{specialty}</p>
+                      <p className="text-3xl font-black text-orange-400 mt-4">{load}</p>
+                      <p className="text-sm text-slate-400 mt-2">{action}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            )}
+
+            {activeTab === 'branches' && (
+              <>
+                <Card className="bg-slate-900 border-slate-800">
+                  <CardContent className="p-6">
+                    <Map className="w-6 h-6 text-green-400 mb-4" />
+                    <p className="text-xs text-slate-500 font-bold uppercase">Nearest Faster Branch Router</p>
+                    <p className="text-xl font-black text-white mt-2">{adminOps.branchRouter}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-900 border-slate-800">
+                  <CardContent className="p-6">
+                    <Zap className="w-6 h-6 text-amber-400 mb-4" />
+                    <p className="text-xs text-slate-500 font-bold uppercase">Rush Prediction AI</p>
+                    <p className="text-xl font-black text-white mt-2">{adminOps.rushForecast}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-900 border-slate-800">
+                  <CardContent className="p-6">
+                    <Building className="w-6 h-6 text-blue-400 mb-4" />
+                    <p className="text-xs text-slate-500 font-bold uppercase">Multi-Branch Coordination</p>
+                    <p className="text-xl font-black text-white mt-2">Live crowd, queue, billing, labs and pharmacy synced.</p>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

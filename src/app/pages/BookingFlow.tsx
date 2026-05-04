@@ -13,13 +13,18 @@ import {
   CheckCircle,
   Activity,
   Shield,
-  Download
+  Download,
+  MapPin,
+  Mic,
+  MicOff,
+  Stethoscope
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import html2canvas from "html2canvas";
 import { useRef } from "react";
 import { mockDoctors, addAppointment, type Doctor, type Appointment } from "../data/mockData";
 import { toast } from "sonner";
+import { calculateDynamicSlot, getWaitlistFill, predictWaitTime } from "../utils/smartHealthcare";
 
 export default function BookingFlow() {
   const { doctorId } = useParams();
@@ -28,8 +33,30 @@ export default function BookingFlow() {
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedBranch, setSelectedBranch] = useState<string>("Main Hospital");
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [caseComplexity, setCaseComplexity] = useState("Routine consultation");
   const receiptRef = useRef<HTMLDivElement>(null);
+
+  const branches = ["Main Hospital (City Center)", "North Clinic (Suburbs)", "West Wing (Emergency)"];
+
+  const toggleListening = () => {
+    if (isListening) {
+      setIsListening(false);
+      toast.info("Voice booking stopped. Processing...");
+      setTimeout(() => {
+        setTranscript("Booking for tomorrow at 10 AM");
+        setSelectedDate(Object.keys(doctor?.availability || {})[0] || "");
+        setSelectedTime("10:00 AM");
+        toast.success("Voice command processed!");
+      }, 1000);
+    } else {
+      setIsListening(true);
+      toast.success("Listening... Speak your preferred date and time.");
+    }
+  };
 
   useEffect(() => {
     if (showConfirmation) {
@@ -99,6 +126,11 @@ export default function BookingFlow() {
   }
 
   const availableDates = Object.keys(doctor.availability);
+  const priorityScore = caseComplexity.toLowerCase().includes("pain") || caseComplexity.toLowerCase().includes("urgent") ? 58 : 22;
+  const smartSlot = calculateDynamicSlot(doctor.specialty, priorityScore, doctor.experience > 12 ? 1.12 : 0.95);
+  const liveWait = predictWaitTime(selectedDate ? Math.max(1, doctor.availability[selectedDate].indexOf(selectedTime) + 1) : 2, smartSlot.duration, doctor.experience > 12 ? 1.1 : 0.95, selectedBranch.includes("Main") ? 8 : 2);
+  const waitlistFill = getWaitlistFill(selectedTime || "Earliest cancellation");
+  const fasterBranch = selectedBranch.includes("Main") ? "West Wing (Emergency) is 14 min faster right now" : "Selected branch is currently the faster route";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -137,6 +169,42 @@ export default function BookingFlow() {
                   <Badge variant="secondary" className="mt-2">
                     {doctor.experience} years experience
                   </Badge>
+                </div>
+                <div className="flex flex-col gap-2 border-l pl-6 py-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Branch Location</span>
+                    <select 
+                      value={selectedBranch} 
+                      onChange={(e) => setSelectedBranch(e.target.value)}
+                      className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none font-medium"
+                    >
+                      {branches.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                  <Button 
+                    variant={isListening ? "destructive" : "outline"}
+                    className={`w-full flex gap-2 ${isListening ? 'animate-pulse' : 'hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'}`}
+                    onClick={toggleListening}
+                  >
+                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    {isListening ? "Listening..." : "Voice Booking"}
+                  </Button>
+                </div>
+              </div>
+              <div className="mt-5 grid md:grid-cols-3 gap-3">
+                <div className="md:col-span-2">
+                  <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Case complexity</label>
+                  <input
+                    value={caseComplexity}
+                    onChange={(e) => setCaseComplexity(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+                    placeholder="e.g. chest pain, fever, routine follow-up"
+                  />
+                </div>
+                <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3">
+                  <p className="text-xs font-bold text-indigo-800 uppercase">AI Dynamic Slot</p>
+                  <p className="text-lg font-black text-indigo-950">{smartSlot.label}</p>
+                  <p className="text-xs text-indigo-700">{smartSlot.reason}</p>
                 </div>
               </div>
             </CardContent>
@@ -213,6 +281,7 @@ export default function BookingFlow() {
                   <div className="grid grid-cols-3 gap-2">
                     {doctor.availability[selectedDate].map((time) => {
                       const isSelected = selectedTime === time;
+                      const slotWait = predictWaitTime(Math.max(1, doctor.availability[selectedDate].indexOf(time) + 1), smartSlot.duration, doctor.experience > 12 ? 1.1 : 0.95, selectedBranch.includes("Main") ? 8 : 2);
                       return (
                         <button
                           key={time}
@@ -223,7 +292,8 @@ export default function BookingFlow() {
                               : "border-gray-200 hover:border-blue-300"
                           }`}
                         >
-                          {time}
+                          <span className="block font-semibold">{time}</span>
+                          <span className="block text-[10px] text-gray-500">{slotWait.label}</span>
                         </button>
                       );
                     })}
@@ -262,9 +332,25 @@ export default function BookingFlow() {
                     <span className="text-gray-600">Time:</span>
                     <span className="font-semibold">{selectedTime}</span>
                   </div>
+                  <div className="grid md:grid-cols-3 gap-3 pt-3">
+                    <div className="rounded-lg bg-white/70 border border-blue-100 p-3">
+                      <p className="text-xs font-bold text-blue-700 uppercase">Live wait-time</p>
+                      <p className="text-lg font-black text-blue-950">{liveWait.label}</p>
+                      <p className="text-xs text-blue-700">{liveWait.confidence}% confidence</p>
+                    </div>
+                    <div className="rounded-lg bg-white/70 border border-emerald-100 p-3">
+                      <p className="text-xs font-bold text-emerald-700 uppercase">Waitlist fill</p>
+                      <p className="text-sm font-black text-emerald-950">{waitlistFill.candidate}</p>
+                      <p className="text-xs text-emerald-700">{waitlistFill.channel}, {waitlistFill.responseWindow}</p>
+                    </div>
+                    <div className="rounded-lg bg-white/70 border border-amber-100 p-3">
+                      <p className="text-xs font-bold text-amber-700 uppercase">Branch router</p>
+                      <p className="text-xs font-bold text-amber-950">{fasterBranch}</p>
+                    </div>
+                  </div>
                 </div>
                 <Button className="w-full" size="lg" onClick={handleBookAppointment}>
-                  Confirm Booking
+                  1-Click Smart Confirm
                 </Button>
               </CardContent>
             </Card>

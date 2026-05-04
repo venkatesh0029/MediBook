@@ -18,6 +18,7 @@ import { AIChatbot } from '../components/AIChatbot';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shield, MapPin, Zap, Activity as HeartActivity } from 'lucide-react';
 import { useLiveEvents } from '../hooks/useLiveEvents';
+import { getPatientCarePlan, rankDoctors } from '../utils/smartHealthcare';
 
 interface Doctor {
   userId: string;
@@ -27,6 +28,10 @@ interface Doctor {
   rating: number;
   reviewCount: number;
   available: boolean;
+  matchScore?: number;
+  matchReason?: string;
+  estimatedDistance?: string;
+  estimatedCost?: number;
 }
 
 interface Appointment {
@@ -78,6 +83,17 @@ export function PatientDashboard() {
   // Voice input state
   const [isListening, setIsListening] = useState<'condition' | 'cause' | null>(null);
 
+  // Orchestrator V2 States
+  const [seniorMode, setSeniorMode] = useState(false);
+  const [selectedFamilyMember, setSelectedFamilyMember] = useState('self');
+  const [showReminders, setShowReminders] = useState(false);
+
+  const mockFamilyMembers = [
+    { id: 'self', name: 'Self', relation: 'Self' },
+    { id: 'f1', name: 'Martha (Mother)', relation: 'Mother' },
+    { id: 'f2', name: 'Tommy (Son)', relation: 'Son' }
+  ];
+
   // Initialize and update queue
   useEffect(() => {
     const initialQueue: Record<string, { position: number, waitTime: number }> = {};
@@ -110,6 +126,27 @@ export function PatientDashboard() {
 
     return () => clearInterval(interval);
   }, [appointments]);
+
+  // Simulate Smart Reminders on load
+  useEffect(() => {
+    if (!isLoading && appointments.length > 0 && !showReminders) {
+      setTimeout(() => {
+        toast.custom((t) => (
+          <div className="bg-white p-4 rounded-xl shadow-2xl border-l-4 border-blue-500 max-w-sm w-full flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="bg-green-100 text-green-700 p-1 rounded-full"><Activity className="w-4 h-4" /></span>
+              <span className="font-bold text-gray-800">WhatsApp Reminder Sent</span>
+            </div>
+            <p className="text-sm text-gray-600">Your appointment with Dr. {appointments[0]?.doctorName} is tomorrow at {appointments[0]?.time}.</p>
+            <div className="flex gap-2 mt-2">
+              <Button size="sm" className="bg-blue-600 w-full" onClick={() => toast.dismiss(t)}>Confirm (1-Tap)</Button>
+            </div>
+          </div>
+        ), { duration: 8000 });
+        setShowReminders(true);
+      }, 3000);
+    }
+  }, [isLoading, appointments, showReminders]);
 
   const startListening = (field: 'condition' | 'cause') => {
     // @ts-ignore
@@ -306,9 +343,10 @@ export function PatientDashboard() {
     }, 2000);
   };
 
-  const filteredDoctors = doctors.filter((doctor) =>
+  const filteredDoctors = rankDoctors(doctors, searchQuery || emergencyCondition || 'general consultation').filter((doctor) =>
     doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+    doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    !searchQuery
   );
 
   const upcomingAppointments = appointments.filter(
@@ -318,6 +356,7 @@ export function PatientDashboard() {
   const completedAppointments = appointments.filter(
     (apt) => apt.status === 'completed'
   );
+  const carePlan = getPatientCarePlan();
 
   if (isLoading) {
     return (
@@ -384,7 +423,7 @@ export function PatientDashboard() {
         onLogout={handleLogout}
       />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className={`container mx-auto px-4 py-8 ${seniorMode ? 'scale-110 origin-top' : ''}`}>
         {/* Welcome Section */}
         <motion.div 
           className="mb-8"
@@ -392,18 +431,48 @@ export function PatientDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700 mb-2">
-            Welcome, {profile?.name} 👋
-          </h2>
-          <div className="flex items-center justify-between">
-            <p className="text-lg text-gray-600 font-medium">AI-Powered Smart Healthcare Orchestrator</p>
-            <Button 
-              onClick={() => setShowEmergencyDialog(true)}
-              className="bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-200 animate-pulse-slow px-6 py-6 rounded-2xl flex items-center gap-2 group"
-            >
-              <AlertCircle className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-              <span className="text-lg font-bold uppercase tracking-tight">Emergency Slot</span>
-            </Button>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700 mb-2">
+                Welcome, {selectedFamilyMember === 'self' ? profile?.name : mockFamilyMembers.find(f => f.id === selectedFamilyMember)?.name} 👋
+              </h2>
+              <p className="text-lg text-gray-600 font-medium">AI-Powered Smart Healthcare Orchestrator</p>
+            </div>
+            
+            <div className="flex items-center gap-3 bg-white/50 p-2 rounded-xl backdrop-blur">
+              {/* Family Switcher */}
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
+                <span className="text-sm font-semibold text-gray-500">Viewing:</span>
+                <Select value={selectedFamilyMember} onValueChange={setSelectedFamilyMember}>
+                  <SelectTrigger className="w-[140px] h-8 border-0 shadow-none focus:ring-0 font-bold text-blue-700">
+                    <SelectValue placeholder="Select Member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockFamilyMembers.map(member => (
+                      <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Senior Mode Toggle */}
+              <Button 
+                variant={seniorMode ? "default" : "outline"}
+                onClick={() => setSeniorMode(!seniorMode)}
+                className={`transition-all ${seniorMode ? 'bg-indigo-600 hover:bg-indigo-700 shadow-lg' : 'bg-white hover:bg-gray-50 border-gray-200'}`}
+              >
+                <span className="text-xl mr-2">👓</span>
+                Senior Mode {seniorMode ? 'ON' : 'OFF'}
+              </Button>
+
+              <Button 
+                onClick={() => setShowEmergencyDialog(true)}
+                className="bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-200 animate-pulse-slow px-6 py-6 rounded-2xl flex items-center gap-2 group ml-4"
+              >
+                <AlertCircle className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                <span className="text-lg font-bold uppercase tracking-tight">Emergency Slot</span>
+              </Button>
+            </div>
           </div>
         </motion.div>
 
@@ -431,6 +500,38 @@ export function PatientDashboard() {
             iconBgColor="bg-purple-100"
             subtitle={`Out of ${doctors.length} total`}
           />
+        </div>
+
+        {/* Smart Care Continuity */}
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-2 border-emerald-100 bg-white/85 shadow-sm">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Follow-Up Plan</p>
+              <p className="text-lg font-black text-gray-900 mt-1">{carePlan.followUp}</p>
+              <p className="text-xs text-gray-500 mt-1">Created after every completed visit.</p>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-blue-100 bg-white/85 shadow-sm">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Health Locker Vault</p>
+              <p className="text-sm font-bold text-gray-900 mt-1">{carePlan.lockerItems.join(' + ')}</p>
+              <p className="text-xs text-gray-500 mt-1">Reports stay linked to one profile.</p>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-amber-100 bg-white/85 shadow-sm">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Preventive Nudges</p>
+              <p className="text-sm font-bold text-gray-900 mt-1">{carePlan.preventiveNudges[0]}</p>
+              <p className="text-xs text-gray-500 mt-1">{carePlan.preventiveNudges.slice(1).join(', ')}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-rose-100 bg-white/85 shadow-sm">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-rose-700 uppercase tracking-wider">Recovery Tracker</p>
+              <p className="text-lg font-black text-gray-900 mt-1">{carePlan.recovery}% improving</p>
+              <p className="text-xs text-gray-500 mt-1">{carePlan.mentalHealth}</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Patient Digital Twin & Premium */}
@@ -680,6 +781,19 @@ export function PatientDashboard() {
                 Choose a new date and time for your appointment with Dr. {selectedAppointment?.doctorName}.
               </DialogDescription>
             </DialogHeader>
+            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 my-2 flex items-start gap-3">
+              <BrainCircuit className="w-5 h-5 text-indigo-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-indigo-900">AI Suggested Next Slot</p>
+                <p className="text-xs text-indigo-700">Dr. {selectedAppointment?.doctorName} is available tomorrow at 10:00 AM.</p>
+                <Button size="sm" className="mt-2 bg-indigo-600 h-7 text-xs" onClick={() => {
+                  const tmrw = new Date();
+                  tmrw.setDate(tmrw.getDate() + 1);
+                  setNewDate(tmrw.toISOString().split('T')[0]);
+                  setNewTime('10:00 AM');
+                }}>Select Suggested Slot</Button>
+              </div>
+            </div>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="date" className="text-right">
@@ -889,7 +1003,7 @@ export function PatientDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-2xl mb-4">
                 <Stethoscope className="w-6 h-6 text-blue-600" />
-                Find a Doctor
+                Best Match Doctor AI
               </CardTitle>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -933,6 +1047,9 @@ export function PatientDashboard() {
                               <p className="text-sm text-blue-600 font-medium mt-1">
                                 {doctor.specialty}
                               </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {doctor.matchReason} | {doctor.matchScore}% match
+                              </p>
                             </div>
                             {doctor.available && (
                               <div className="flex flex-col items-end gap-2">
@@ -940,7 +1057,7 @@ export function PatientDashboard() {
                                   Available
                                 </Badge>
                                 <Badge variant="outline" className="text-xs text-gray-500 bg-gray-50 flex items-center gap-1 border-gray-200">
-                                  <MapPin className="w-3 h-3 text-indigo-400" /> {(Math.random() * 5 + 0.5).toFixed(1)} km away
+                                  <MapPin className="w-3 h-3 text-indigo-400" /> {doctor.estimatedDistance} away
                                 </Badge>
                               </div>
                             )}
@@ -958,6 +1075,11 @@ export function PatientDashboard() {
                               <span className="text-gray-500">
                                 ({doctor.reviewCount} reviews)
                               </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 pt-2">
+                              <Badge variant="outline" className="justify-center bg-blue-50 text-blue-700 border-blue-100">{doctor.matchScore}% AI</Badge>
+                              <Badge variant="outline" className="justify-center bg-emerald-50 text-emerald-700 border-emerald-100">Tamil/Hindi</Badge>
+                              <Badge variant="outline" className="justify-center bg-amber-50 text-amber-700 border-amber-100">₹{doctor.estimatedCost}</Badge>
                             </div>
                           </div>
                           <Button 
