@@ -1,152 +1,147 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=white" />
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/MongoDB-7.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
-</p>
+<div align="center">
 
-<h1 align="center">🏥 MediBook — AI-Powered Smart Healthcare Orchestrator</h1>
+# 🏥 MediBook
 
-<p align="center">
-  <strong>An intelligent, full-stack hospital appointment management platform that fuses AI-driven symptom triage, real-time priority queuing, blockchain-secured medical records, and a patient digital twin — all wrapped in a premium, cinematic UI.</strong>
-</p>
+### AI-Powered Smart Healthcare Orchestrator
 
-<p align="center">
-  <a href="#-key-features">Features</a> •
-  <a href="#-system-architecture">Architecture</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
-  <a href="#-getting-started">Setup</a> •
-  <a href="#-demo-mode">Demo</a> •
-  <a href="#-api-reference">API</a> •
-  <a href="#-novelty--what-makes-this-different">Novelty</a> •
-  <a href="#-future-roadmap">Roadmap</a>
-</p>
+**An intelligent, full-stack hospital appointment management platform featuring AI-driven symptom triage, real-time priority queuing, blockchain-secured medical records, and a patient digital twin — wrapped in a premium cinematic UI.**
+
+<br/>
+
+![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white)
+
+<br/>
+
+[Features](#-features) · [Architecture](#-architecture) · [Tech Stack](#-tech-stack) · [Quick Start](#-quick-start) · [Demo Mode](#-demo-mode) · [API Reference](#-api-reference) · [Roadmap](#-roadmap)
+
+</div>
 
 ---
 
 ## 📌 Problem Statement
 
-Traditional hospital booking systems suffer from:
+Traditional hospital booking systems are fundamentally broken:
+
 - **Blind scheduling** — patients are booked without any assessment of urgency
-- **No intelligent triage** — critical cases wait alongside routine check-ups
+- **No intelligent triage** — critical cases wait in line alongside routine check-ups
 - **Zero transparency** — no real-time queue visibility or wait-time estimates
 - **Data insecurity** — sensitive medical records lack tamper-proof verification
 
-**MediBook solves all of this** by transforming a standard appointment system into an **AI-Powered Smart Healthcare Orchestrator** — a platform where every booking is intelligently analyzed, prioritized, and secured.
+**MediBook solves all of this** by transforming a standard booking system into an **AI-Powered Smart Healthcare Orchestrator** — where every appointment is intelligently analyzed, prioritized, and secured.
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-### 🧠 1. AI Symptom Triage Engine
-A rule-based neural triage system that analyzes patient symptoms in real-time and assigns a **priority score (0–100)**, severity level (`Low` / `Medium` / `Critical`), and auto-recommends the best-matched specialist.
+### 🧠 AI Symptom Triage Engine
+A rule-based triage system that analyzes patient-described symptoms in real-time and assigns a **priority score (0–100)**, a severity level (`Low` / `Medium` / `Critical`), and auto-recommends the best-matched specialist.
 
 ```
-Patient Input: "Severe chest pain, difficulty breathing"
-→ Priority Score: 80 | Severity: CRITICAL | Recommended: Cardiologist
+Input:  "Severe chest pain, difficulty breathing"
+Output: Priority Score: 80 | Severity: CRITICAL | Specialist: Cardiologist
 ```
 
-### 🚨 2. Emergency Priority Booking
+### 🚨 Emergency Priority Booking
 One-click emergency slot booking that bypasses normal queues. The AI engine auto-assigns the most relevant available doctor and flags the appointment with visual urgency indicators across all dashboards.
 
-### 🤖 3. Pulse AI Chat Assistant
-A floating AI chatbot (bottom-right FAB) where patients can describe symptoms in natural language. The assistant runs real-time triage analysis and provides instant severity alerts with specialist recommendations.
+### 🤖 Pulse AI Chat Assistant
+A floating AI chatbot where patients describe symptoms in natural language. The assistant performs real-time triage and provides instant severity alerts with specialist recommendations.
 
-### 🧬 4. Patient Digital Twin
+### 🧬 Patient Digital Twin
 Each patient dashboard features a **Digital Twin** panel — a living, AI-monitored profile showing:
 - Current health risk score
 - Recent condition tracking
 - Blockchain integrity hash for medical record verification
 
-### 🔗 5. Blockchain-Secured Medical Records
-Every user record generates a **SHA-256 blockchain hash** on creation/update (computed from `email + name + role + userId`). This hash is displayed in the Digital Twin panel, enabling tamper-proof data integrity verification.
+### 🔗 Blockchain-Secured Medical Records
+Every user record generates a **SHA-256 blockchain hash** on creation and update (derived from `email + name + role + userId`). The hash is displayed in the Digital Twin panel, enabling tamper-proof data integrity checks.
 
-### 📊 6. Smart Priority Queue (Doctor Dashboard)
-Doctors see appointments auto-sorted by AI severity score — critical patients surface to the top with pulsing red indicators and AI triage alert cards, ensuring the most urgent cases are never missed.
+### 📊 Smart Priority Queue (Doctor Dashboard)
+Doctors see appointments auto-sorted by AI severity score. Critical patients surface to the top with pulsing red indicators and AI triage alert cards, ensuring the most urgent cases are never missed.
 
-### 🎯 7. Role-Based Dashboards
-Three distinct, purpose-built dashboards:
+### 🎯 Role-Based Dashboards
 
-| Role | Dashboard Capabilities |
-|------|----------------------|
+| Role | Capabilities |
+|------|-------------|
 | **Patient** | Browse doctors, book appointments, emergency booking, reschedule/cancel, AI chatbot, Digital Twin |
 | **Doctor** | Smart priority queue, appointment management (complete/cancel), profile editor, AI triage alerts |
 | **Admin** | System-wide statistics, user management, doctor oversight, appointment monitoring |
 
-### ⏰ 8. Smart Reschedule Guard
-Appointments can only be rescheduled **at least 2 hours** before the scheduled time — enforced both in UI (disabled button + visual warning) and in business logic.
+### ⏰ Smart Reschedule Guard
+Appointments can only be rescheduled **at least 2 hours** before the scheduled time — enforced both in the UI and in business logic.
 
-### 🔌 9. Dual-Mode Architecture
+### 🔌 Dual-Mode Architecture
 The app runs in two modes seamlessly:
 - **Live Mode** — Full-stack with Next.js API + MongoDB backend
-- **Demo Mode** — Zero-setup, localStorage-powered simulation with pre-seeded data (toggle with one click)
+- **Demo Mode** — Zero-setup, `localStorage`-powered simulation with pre-seeded data (one-click toggle)
 
-### 🎨 10. Premium Cinematic UI
+### 🎨 Premium Cinematic UI
 - Glassmorphism cards with `backdrop-blur`
 - Framer Motion page transitions and micro-animations
 - Gradient mesh backgrounds with parallax scrolling
 - Floating animated cards on the landing page
-- Responsive design across all breakpoints
+- Fully responsive across all breakpoints
 
 ---
 
-## 🏗 System Architecture
+## 🏗 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT (Vite + React)                    │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────────┐   │
-│  │ Landing  │ │ Patient  │ │ Doctor   │ │ Admin Dashboard   │   │
-│  │ Page     │ │Dashboard │ │Dashboard │ │                   │   │ 
-│  └──────────┘ └──────────┘ └──────────┘ └───────────────────┘   │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────────┐   │
-│  │ AI Chat  │ │Emergency │ │ Digital  │ │ Booking Flow      │   │
-│  │ Bot      │ │ Booking  │ │ Twin     │ │                   │   │
-│  └──────────┘ └──────────┘ └──────────┘ └───────────────────┘   │
-│       │              │              │              │            │
-│       ▼              ▼              ▼              ▼            │
-│  ┌─────────────────────────────────────────────────────────┐    │ 
-│  │              AI Triage Engine (aiEngine.ts)             │    │
-│  │   Keyword Analysis → Age Factor → Score → Specialist    │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                            │                                    │
-│              ┌─────────────┴─────────────┐                      │
-│              ▼                           ▼                      │
-│     ┌──────────────┐          ┌───────────────┐                 │
-│     │  Demo Mode   │          │  Live API     │                 │
-│     │ (localStorage)│         │  (fetch)      │                 │
-│     └──────────────┘          └───────┬───────┘                 │
-└───────────────────────────────────────┼────────────────────────┘
-                                        │ HTTP/REST
-                                        ▼
+│                      CLIENT (Vite + React)                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────┐   │
+│  │ Landing  │  │ Patient  │  │  Doctor  │  │ Admin         │   │
+│  │  Page    │  │Dashboard │  │Dashboard │  │ Dashboard     │   │
+│  └──────────┘  └──────────┘  └──────────┘  └───────────────┘   │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────┐   │
+│  │ Pulse AI │  │Emergency │  │ Digital  │  │ Booking Flow  │   │
+│  │ Chatbot  │  │ Booking  │  │  Twin    │  │               │   │
+│  └──────────┘  └──────────┘  └──────────┘  └───────────────┘   │
+│                           │                                     │
+│              ┌────────────▼────────────┐                        │
+│              │   AI Triage Engine      │                        │
+│              │ (aiEngine.ts)           │                        │
+│              │ Keywords → Age Factor   │                        │
+│              │ → Score → Specialist    │                        │
+│              └────────────┬────────────┘                        │
+│                 ┌─────────┴──────────┐                          │
+│                 ▼                    ▼                           │
+│        ┌──────────────┐    ┌──────────────┐                     │
+│        │  Demo Mode   │    │  Live API    │                     │
+│        │(localStorage)│    │   (fetch)    │                     │
+│        └──────────────┘    └──────┬───────┘                     │
+└───────────────────────────────────┼─────────────────────────────┘
+                                    │ HTTP / REST
+                                    ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                   BACKEND (Next.js App Router)                  │
-│  ┌────────────┐ ┌────────────┐ ┌──────────┐ ┌──────────────┐  │
-│  │ CORS       │ │ JWT Auth   │ │ Role     │ │ Blockchain   │  │
-│  │ Middleware │ │ Middleware │ │ Guard    │ │ Hash (SHA256)│  │
-│  └────────────┘ └────────────┘ └──────────┘ └──────────────┘  │
+│                  BACKEND (Next.js App Router)                   │
+│  ┌────────────┐  ┌────────────┐  ┌──────────┐  ┌───────────┐  │
+│  │    CORS    │  │  JWT Auth  │  │   Role   │  │Blockchain │  │
+│  │ Middleware │  │ Middleware │  │  Guard   │  │  SHA-256  │  │
+│  └────────────┘  └────────────┘  └──────────┘  └───────────┘  │
 │                                                                 │
-│  API Routes:                                                    │
-│  POST /api/auth/signup    POST /api/auth/signin                │
-│  GET  /api/auth/verify    GET  /api/doctors                    │
-│  GET  /api/appointments   POST /api/appointments               │
-│  PUT  /api/appointments   GET  /api/users (admin)              │
+│  POST /api/auth/signup      POST /api/auth/signin              │
+│  GET  /api/auth/verify      GET  /api/doctors                  │
+│  GET  /api/appointments     POST /api/appointments             │
+│  PUT  /api/appointments/:id GET  /api/users (admin)            │
 │  GET  /api/health                                              │
 └──────────────────────────┬──────────────────────────────────────┘
-                           │ Mongoose ODM
+                           │  Mongoose ODM
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     MongoDB (Atlas / Local)                     │
-│  ┌──────────────────┐    ┌────────────────────────────────┐    │
-│  │ Users Collection │    │ Appointments Collection        │    │
-│  │ • email, password│    │ • patientId, doctorId          │    │
-│  │ • role, specialty│    │ • date, time, status           │    │
-│  │ • blockchainHash │    │ • priorityScore, severityLevel │    │
-│  │ • digitalTwin[]  │    │ • aiAnalysis, metadata         │    │
-│  │ • isPremium      │    │ • isEmergency                  │    │
-│  └──────────────────┘    └────────────────────────────────┘    │
+│                   MongoDB (Atlas / Local)                       │
+│  ┌─────────────────────┐   ┌─────────────────────────────────┐ │
+│  │   Users Collection  │   │     Appointments Collection     │ │
+│  │  email, password    │   │  patientId, doctorId            │ │
+│  │  role, specialty    │   │  date, time, status             │ │
+│  │  blockchainHash     │   │  priorityScore, severityLevel   │ │
+│  │  digitalTwin[]      │   │  aiAnalysis, isEmergency        │ │
+│  └─────────────────────┘   └─────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -156,14 +151,14 @@ The app runs in two modes seamlessly:
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Frontend** | React 18 + TypeScript | Component-based UI with type safety |
-| **Build Tool** | Vite 6 | Lightning-fast HMR and bundling |
+| **Frontend** | React 18 + TypeScript | Component-based UI with full type safety |
+| **Build Tool** | Vite 6 | Lightning-fast HMR and optimized bundling |
 | **Styling** | Tailwind CSS v4 | Utility-first responsive design |
-| **UI Library** | Radix UI + shadcn/ui | Accessible, composable primitives |
-| **Animations** | Framer Motion (motion) | Page transitions and micro-interactions |
+| **UI Components** | Radix UI + shadcn/ui | Accessible, composable component primitives |
+| **Animations** | Framer Motion (`motion`) | Page transitions and micro-interactions |
 | **Routing** | React Router v7 | Client-side routing with data mode |
 | **Charts** | Recharts | Admin analytics visualizations |
-| **Backend** | Next.js 16 (App Router) | REST API with TypeScript |
+| **Backend** | Next.js 16 (App Router) | TypeScript REST API |
 | **Database** | MongoDB + Mongoose | Document-based data storage |
 | **Auth** | JWT + bcryptjs | Stateless authentication with hashed passwords |
 | **Security** | SHA-256 Hashing | Blockchain-style data integrity verification |
@@ -172,19 +167,20 @@ The app runs in two modes seamlessly:
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Node.js** v20+ and **npm**
-- **MongoDB** instance (local, Docker, or Atlas)
-- **Docker** (optional, for containerized deployment)
+- **Node.js** v20+
+- **npm** or **pnpm**
+- **MongoDB** (local, Docker, or Atlas)
+- **Docker** *(optional, for containerized deployment)*
 
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/your-username/Digital_Booking_System.git
-cd Digital_Booking_System
+git clone https://github.com/venkatesh0029/MediBook.git
+cd MediBook
 
 # Install frontend dependencies
 npm install
@@ -200,9 +196,9 @@ cd ..
 Create `backend/.env.local`:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/digital_booking_system
+MONGODB_URI=mongodb://localhost:27017/medibook
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
-FRONTEND_ORIGIN=http://localhost:3000
+FRONTEND_ORIGIN=http://localhost:5173
 ```
 
 ### 3. Start Development Servers
@@ -218,7 +214,7 @@ npm run dev
 
 ### 4. Open the App
 
-Navigate to `http://localhost:5173` — sign up as Patient, Doctor, or Admin.
+Navigate to `http://localhost:5173` and sign up as a **Patient**, **Doctor**, or **Admin**.
 
 ---
 
@@ -227,7 +223,8 @@ Navigate to `http://localhost:5173` — sign up as Patient, Doctor, or Admin.
 **No backend? No problem.** MediBook includes a **zero-config Demo Mode** that simulates the entire backend using `localStorage`.
 
 ### Activating Demo Mode
-1. If the backend is offline, the auth page shows a **"Enable Demo Mode"** button
+
+1. If the backend is offline, the auth page shows an **"Enable Demo Mode"** button
 2. Click it — the app switches to local simulation instantly
 3. All CRUD operations work identically, stored in your browser
 
@@ -241,7 +238,8 @@ Navigate to `http://localhost:5173` — sign up as Patient, Doctor, or Admin.
 | 🔧 Admin | `admin@demo.com` | `demo123` |
 
 ### Pre-Seeded Demo Data
-- **6 Doctors** across specialties: Cardiology, Pediatrics, Dermatology, Orthopedics, Neurology, General Medicine
+
+- **6 Doctors** across: Cardiology, Pediatrics, Dermatology, Orthopedics, Neurology, General Medicine
 - **1 Patient** with 2 pre-booked appointments
 - **1 Admin** with system-wide access
 
@@ -252,15 +250,15 @@ Navigate to `http://localhost:5173` — sign up as Patient, Doctor, or Admin.
 All endpoints are prefixed with `/api`. Protected routes require `Authorization: Bearer <JWT>`.
 
 | Method | Endpoint | Description | Auth | Roles |
-|--------|----------|-------------|:----:|-------|
-| `POST` | `/auth/signup` | Register new user (bcrypt-hashed password) | ✗ | — |
-| `POST` | `/auth/signin` | Login → returns JWT token | ✗ | — |
-| `GET` | `/auth/verify` | Validate JWT token | ✓ | Any |
-| `GET` | `/doctors` | List all doctors (password excluded) | ✓ | Any |
-| `GET` | `/appointments` | Get appointments for current user | ✓ | Patient, Doctor, Admin |
+|--------|----------|-------------|------|-------|
+| `POST` | `/auth/signup` | Register a new user (bcrypt-hashed password) | ✗ | — |
+| `POST` | `/auth/signin` | Login and receive a JWT token | ✗ | — |
+| `GET` | `/auth/verify` | Validate a JWT token | ✓ | Any |
+| `GET` | `/doctors` | List all doctors (passwords excluded) | ✓ | Any |
+| `GET` | `/appointments` | Get appointments for the current user | ✓ | Patient, Doctor, Admin |
 | `POST` | `/appointments` | Book a new appointment | ✓ | Patient |
 | `PUT` | `/appointments/:id` | Update appointment status | ✓ | Doctor, Admin |
-| `GET` | `/users` | List all users (admin only) | ✓ | Admin |
+| `GET` | `/users` | List all users | ✓ | Admin |
 | `GET` | `/health` | Server health check | ✗ | — |
 
 ---
@@ -275,41 +273,67 @@ docker compose up -d --build
 #   API     → http://localhost:3001
 #   MongoDB → localhost:27017
 
-# Stop and cleanup
+# Stop and clean up
 docker compose down
-docker volume rm $(docker volume ls -qf name=Digital_Booking_System_mongo-data)
+docker volume rm $(docker volume ls -qf name=medibook_mongo-data)
 ```
 
 ---
 
-## 🏆 Novelty — What Makes This Different
+## 📂 Project Structure
 
-| # | Innovation | Description |
-|---|-----------|-------------|
-| 1 | **AI Triage Engine** | Not just a booking system — every appointment is risk-scored by an intelligent symptom analysis pipeline |
-| 2 | **Emergency Fast-Track** | Critical cases bypass normal queues via AI-assessed severity with auto-specialist matching |
-| 3 | **Digital Twin Concept** | Patients have a living health profile that visualizes risk trends and condition history |
-| 4 | **Blockchain Data Integrity** | SHA-256 hash-based tamper detection on all medical records (generated on every DB write) |
-| 5 | **Dual-Mode Architecture** | Seamless toggle between full-stack (MongoDB) and demo (localStorage) without code changes |
-| 6 | **AI Chat Assistant** | Natural-language symptom input with real-time triage feedback and emergency escalation |
-| 7 | **Smart Priority Queue** | Doctor view auto-sorts patients by AI severity — critical cases glow red with pulse animations |
-| 8 | **Time-Guarded Rescheduling** | Business rule enforcement (2-hour cutoff) with progressive UI disclosure |
-| 9 | **Premium Cinematic UI** | Glassmorphism, parallax backgrounds, Framer Motion transitions — hackathon-grade polish |
-| 10 | **Microservice-Ready** | Decoupled Vite frontend + Next.js API backend — independently deployable and scalable |
+```
+MediBook/
+├── src/                               # Frontend (Vite + React)
+│   ├── components/
+│   │   ├── AIChatbot.tsx              # Floating AI symptom assistant
+│   │   ├── DashboardHeader.tsx        # Shared dashboard header
+│   │   ├── DemoModeBanner.tsx         # Demo mode indicator
+│   │   ├── StatCard.tsx               # Reusable stat display card
+│   │   ├── SystemStatus.tsx           # Backend health checker + demo toggle
+│   │   └── ui/                        # shadcn/ui primitives
+│   ├── context/
+│   │   └── AuthContext.tsx            # Authentication state provider
+│   ├── hooks/
+│   │   └── useLiveEvents.ts           # Simulated real-time event toasts
+│   ├── pages/
+│   │   ├── LandingPage.tsx            # Marketing landing page
+│   │   ├── AuthPage.tsx               # Login/Signup with demo mode toggle
+│   │   ├── PatientDashboard.tsx       # Patient portal (Digital Twin, Emergency)
+│   │   ├── DoctorDashboard.tsx        # Doctor portal (Priority Queue)
+│   │   ├── DoctorProfile.tsx          # Doctor detail + booking
+│   │   ├── AdminDashboard.tsx         # System admin overview
+│   │   └── BookingFlow.tsx            # Step-by-step booking wizard
+│   └── utils/
+│       ├── aiEngine.ts                # AI Triage Engine (symptom analysis)
+│       ├── api.ts                     # Fetch wrapper / API client
+│       ├── auth.ts                    # JWT helpers
+│       └── demoMode.ts                # localStorage-based demo simulation
+│
+├── backend/                           # Backend (Next.js App Router)
+│   └── src/
+│       ├── app/api/
+│       │   ├── auth/                  # signup, signin, verify
+│       │   ├── doctors/               # Doctor listing
+│       │   ├── appointments/          # CRUD operations
+│       │   ├── users/                 # Admin user management
+│       │   └── health/                # Health check endpoint
+│       ├── lib/
+│       │   ├── mongodb.ts             # Mongoose connection singleton
+│       │   ├── auth.ts                # JWT verification helper
+│       │   └── roleGuard.ts           # Role-based access control
+│       └── models/
+│           ├── User.ts                # User schema + blockchain hash hook
+│           └── Appointment.ts         # Appointment schema (AI fields)
+│
+├── docker-compose.yml                 # Container orchestration
+├── package.json                       # Frontend dependencies
+└── vite.config.ts                     # Vite build configuration
+```
 
 ---
 
-## 📱 Responsive Design
-
-The application is fully responsive and optimized for:
-- 🖥️ Desktop (1280px+)
-- 💻 Laptop (1024px)
-- 📱 Tablet (768px)
-- 📱 Mobile (320px+)
-
----
-
-## 🔐 Security Architecture
+## 🔐 Security
 
 | Layer | Implementation |
 |-------|---------------|
@@ -320,94 +344,49 @@ The application is fully responsive and optimized for:
 | **Data Integrity** | SHA-256 blockchain hash on user records |
 | **Input Validation** | Mongoose schema validation + frontend form guards |
 
-> ⚠️ **Disclaimer**: This is a prototype/hackathon project. For production healthcare deployment, implement HIPAA-compliant infrastructure, end-to-end encryption, comprehensive audit logging, and consult healthcare compliance experts.
+> ⚠️ **Disclaimer:** MediBook is a prototype. For production healthcare deployment, implement HIPAA-compliant infrastructure, end-to-end encryption, comprehensive audit logging, and consult healthcare compliance experts.
 
 ---
 
-## 📂 Project Structure
+## 🏆 What Makes MediBook Different
 
-```
-Digital_Booking_System/
-├── src/                              # Frontend (Vite + React)
-│   ├── app/
-│   │   ├── components/
-│   │   │   ├── AIChatbot.tsx         # Floating AI symptom assistant
-│   │   │   ├── DashboardHeader.tsx   # Shared dashboard header
-│   │   │   ├── DemoModeBanner.tsx    # Demo mode indicator
-│   │   │   ├── StatCard.tsx          # Reusable stat card
-│   │   │   ├── SystemStatus.tsx      # Backend health checker + demo toggle
-│   │   │   └── ui/                   # shadcn/ui primitives
-│   │   ├── context/
-│   │   │   └── AuthContext.tsx        # Authentication state provider
-│   │   ├── data/
-│   │   │   └── mockData.ts           # Wireframe mock data
-│   │   ├── hooks/
-│   │   │   └── useLiveEvents.ts      # Simulated real-time event toasts
-│   │   ├── pages/
-│   │   │   ├── LandingPage.tsx       # Marketing landing page
-│   │   │   ├── AuthPage.tsx          # Login/Signup with demo mode
-│   │   │   ├── PatientDashboard.tsx  # Patient portal (Digital Twin, Emergency)
-│   │   │   ├── DoctorDashboard.tsx   # Doctor portal (Priority Queue)
-│   │   │   ├── DoctorProfile.tsx     # Doctor detail + booking
-│   │   │   ├── AdminDashboard.tsx    # System admin overview
-│   │   │   └── BookingFlow.tsx       # Step-by-step booking wizard
-│   │   ├── utils/
-│   │   │   ├── aiEngine.ts           # AI Triage Engine (symptom analysis)
-│   │   │   ├── api.ts                # API client (fetch wrapper)
-│   │   │   ├── auth.ts               # JWT helpers
-│   │   │   └── demoMode.ts           # LocalStorage-based demo simulation
-│   │   ├── App.tsx
-│   │   └── routes.tsx                # React Router configuration
-│   └── styles/
-│
-├── backend/                           # Backend (Next.js App Router)
-│   ├── src/
-│   │   ├── app/api/
-│   │   │   ├── auth/                 # signup, signin, verify
-│   │   │   ├── doctors/              # Doctor listing
-│   │   │   ├── appointments/         # CRUD operations
-│   │   │   ├── users/                # Admin user management
-│   │   │   └── health/               # Health check endpoint
-│   │   ├── lib/
-│   │   │   ├── mongodb.ts            # Mongoose connection singleton
-│   │   │   ├── auth.ts               # JWT verification helper
-│   │   │   └── roleGuard.ts          # Role-based access control
-│   │   └── models/
-│   │       ├── User.ts               # User schema + blockchain hash hook
-│   │       └── Appointment.ts        # Appointment schema (AI fields)
-│   ├── middleware.ts                  # CORS + JWT middleware
-│   └── .env.local                    # Environment variables
-│
-├── docker-compose.yml                 # Container orchestration
-├── package.json                       # Frontend dependencies
-└── vite.config.ts                     # Vite build configuration
-```
+| # | Innovation | Description |
+|---|-----------|-------------|
+| 1 | **AI Triage Engine** | Every appointment is risk-scored by an intelligent symptom analysis pipeline — not just a slot-picker |
+| 2 | **Emergency Fast-Track** | Critical cases bypass the queue via AI-assessed severity with auto-specialist matching |
+| 3 | **Patient Digital Twin** | A living health profile that visualizes risk trends and condition history per patient |
+| 4 | **Blockchain Data Integrity** | SHA-256 hash-based tamper detection on all medical records, generated on every DB write |
+| 5 | **Dual-Mode Architecture** | Seamless toggle between full-stack (MongoDB) and demo (localStorage) with zero code changes |
+| 6 | **AI Chat Assistant** | Natural-language symptom input with real-time triage feedback and emergency escalation |
+| 7 | **Smart Priority Queue** | Doctor view auto-sorts patients by AI severity — critical cases pulse red at the top |
+| 8 | **Time-Guarded Rescheduling** | 2-hour cutoff rule enforced in both UI and business logic with progressive disclosure |
 
 ---
 
-## 🔄 Future Roadmap
+## 🔄 Roadmap
 
 | Priority | Feature | Description |
 |----------|---------|-------------|
-| 🔴 High | **WebSocket Real-Time Queue** | Live queue position updates via Socket.io |
-| 🔴 High | **Video Consultation (WebRTC)** | In-app telemedicine with peer-to-peer video |
-| 🟡 Medium | **Voice-Based Symptom Input** | Web Speech API integration for elderly/accessibility |
-| 🟡 Medium | **Multi-Language Support** | i18n with regional language packs |
-| 🟡 Medium | **Email/SMS Reminders** | Automated appointment reminders via Twilio/SendGrid |
-| 🟢 Low | **Payment Gateway** | Razorpay/Stripe integration for consultation fees |
-| 🟢 Low | **Prescription PDF Export** | Auto-generated digital prescriptions |
-| 🟢 Low | **Calendar Sync** | Google Calendar / Outlook integration |
+| 🔴 High | WebSocket Real-Time Queue | Live queue position updates via Socket.io |
+| 🔴 High | Video Consultation (WebRTC) | In-app telemedicine with peer-to-peer video |
+| 🟡 Medium | Voice-Based Symptom Input | Web Speech API for elderly/accessibility use cases |
+| 🟡 Medium | Email/SMS Reminders | Automated appointment reminders via Twilio/SendGrid |
+| 🟡 Medium | Multi-Language Support | i18n with regional language packs |
+| 🟢 Low | Payment Gateway | Razorpay/Stripe integration for consultation fees |
+| 🟢 Low | Prescription PDF Export | Auto-generated digital prescriptions |
+| 🟢 Low | Calendar Sync | Google Calendar / Outlook integration |
 
 ---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Ensure linting and tests pass (`npm run lint && npm test`)
-4. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m 'feat: add your feature'`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Open a Pull Request
+
+Please ensure your code passes linting before submitting a PR.
 
 ---
 
@@ -417,6 +396,8 @@ MIT © 2026 — Built with ❤️ for smarter healthcare.
 
 ---
 
-<p align="center">
-  <strong>⭐ If this project impressed you, give it a star! ⭐</strong>
-</p>
+<div align="center">
+
+⭐ **If MediBook impressed you, drop a star!** ⭐
+
+</div>
